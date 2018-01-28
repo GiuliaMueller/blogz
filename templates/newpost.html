@@ -7,13 +7,15 @@
         <label for="title">Title for your new blog:</label>
             <input name="title" type = "text" class = "title" value={{title}}>
                 <span class="error">{{title_error}}</span>
-         <br>   <label for="body">Your new Blog:</label>
-                <input name="body" type = "textarea" class="text" value={{body}}>
+         <br>   <label for="body">Your new Blog:</label> <br><br>
+                <textarea name = "body" value= {{body}}></textarea>
+                <!-- <input name="body" type = "textarea" value={{body}}> -->
         <span class="error">{{body_error}}</span>
 
 <br><br><input type="submit" value ="Add Entry"/>
 
     </form>
+    
 
 
 {% endblock %}

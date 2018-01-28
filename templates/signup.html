@@ -1,0 +1,60 @@
+{% extends "base.html" %}
+
+<!DOCTYPE html>
+
+<html>
+    <head>
+        <title>Blogz</title>
+        <link rel="stylesheet" href="/css/normalize.css">
+        <link rel="stylesheet" href="/css/styles.css">
+    </head>
+    <body>
+        <nav>
+            <ul id="user-account">
+                <!-- <li><a href="/login">login</a></li>
+                <li><a href="/logout">logout</a></li>
+            </ul>
+            <ul>
+                <li><a href="/">home</a></li>
+                <li><a href="/blog">all posts</a></li>
+                <li><a href="/blog/newpost">new post</a></li> -->
+            </ul>
+        </nav>
+        
+
+<style>
+    .error {
+        color: red;
+    }
+</style>
+<h1>Signup</h1>
+<form method="post">
+    <table>
+        <tr>
+            <td><label for="username">Username</label></td>
+            <td>
+                <input name="username" type="text" value="">
+                <span class="error"></span>
+            </td>
+        </tr>
+        <tr>
+            <td><label for="password">Password</label></td>
+            <td>
+                <input name="password" type="password">
+                <span class="error"></span>
+            </td>
+        </tr>
+        <tr>
+            <td><label for="verify">Verify Password</label></td>
+            <td>
+                <input name="verify" type="password">
+                <span class="error"></span>
+            </td>
+        </tr>
+    </table>
+    <input type="submit">
+</form>
+
+
+    </body>
+</html>
