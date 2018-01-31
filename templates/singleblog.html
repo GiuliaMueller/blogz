@@ -2,8 +2,9 @@
 
 {% block content %}
 
-<h2>Begin Blog Setup</h2>
-<h2>{{blog.title}}</h2>
-{{blog.body}}
+<h2>List of Blogs</h2>
+<p>{{blog.title}}</p>
+<p><a href='singleUser?id={{blog.user_id}}'></a></p>
+<p>{{blog.body}}</p>
 
 {% endblock %}

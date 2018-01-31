@@ -1,5 +1,7 @@
-from flask import Flask, request, redirect,render_template, session, flash
+from flask import Flask, request, redirect, render_template, session, flash
 from flask_sqlalchemy import SQLAlchemy
+from datetime import datetime
+from hashutils import make_pw_hash, check_pw_hash
 
 app = Flask(__name__)
 app.config["DEBUG"] = True
@@ -10,14 +12,15 @@ app.secret_key= "ThisIsMySecretKey"
 
 class Blog(db.Model):
     id = db.Column(db.Integer, primary_key = True)
+    pub_date = db.Column(db.DateTime, nullable=False, default=datetime.utcnow)
     title = db.Column(db.String(120))
     body = db.Column(db.Text)
     owner_id=db.Column(db.Integer, db.ForeignKey('user.id'))
     
-    def __init__(self, title, body, owner):
+    def __init__(self, title, body, author):
         self.title = title
         self.body = body
-        self.owner = owner
+        self.owner_id = User.query.filter_by(username=author).first().id
 
 class User(db.Model):
     id = db.Column(db.Integer, primary_key = True)
@@ -32,7 +35,7 @@ class User(db.Model):
 
 @app.before_request
 def require_login():
-    allowed_routes = ['login', 'signup']
+    allowed_routes = ['login', 'signup', 'index', 'blog']
     if request.endpoint not in allowed_routes and 'username' not in session:
         return redirect ('/login')
 
@@ -41,14 +44,14 @@ def login():
     if request.method == 'POST':
         username = request.form['username']
         password = request.form['password']
-        user=User.query.filter_by(username=username).first()
+        user = User.query.filter_by(username=username).first()
         
         if user and user.password == password:
             session['username']=username
             flash('logged in')
             return redirect ('/newpost')
         else:
-            flash('username and/or password not valid', 'error')
+            flash('username and/or password not valid')
     return render_template('login.html')
 
 @app.route('/signup', methods=["POST","GET"])
@@ -85,7 +88,7 @@ def signup():
         
         if  username_error or  verify_error or  password_error:
 
-            return redirect ('/')
+            return render_template('signup.html', username=username)
         else:
             existing_user = User.query.filter_by(username=username).first()
             if not existing_user:
@@ -99,23 +102,25 @@ def signup():
                 flash('that email address previously registered')
             return render_template ("index.html", username = username, username_error = username_error, 
                password_error = password_error, verify_error = verify_error)
-        
-    return render_template('signup.html')
-
-@app.route("/", methods = ["POST", "GET"])
-def index():
-    blogs = Blog.query.order_by(Blog.id.desc()).all()
-    return render_template("blog.html", blogs = blogs)
-
-@app.route("/blog", methods = ["POST", "GET"])
-def blog():
-    blogid = request.args.get("id")
-    if blogid:
-        blog = Blog.query.filter_by(id=blogid).first()
-        return render_template("singleblog.html", blog=blog)
     else:
-        blogs = Blog.query.order_by(Blog.id.desc()).all()
-        return render_template("blog.html", blogs = blogs)
+        return render_template('signup.html')
+
+@app.route("/")
+def index():
+    users = User.query.all()
+    return render_template("index.html", users = users)
+
+@app.route("/blog")
+def blog():
+    blogs = Blog.query.order_by('pub_date desc').all()
+    print("Blogs ", blogs)
+    #blogs = Blog.query.all()
+    # if blogid:
+    #     blog = Blog.query.filter_by(id=blogid).first()
+    #     return render_template("singleblog.html", blog=blog)
+    # else:
+    #     blogs = Blog.query.order_by(Blog.id.desc()).all()
+    return render_template("blog.html", blogs = blogs)
 
 @app.route('/logout')
 def logout():
@@ -124,37 +129,46 @@ def logout():
 
 @app.route("/newpost", methods = ["POST", "GET"])
 def newpost():
-    return render_template("newpost.html")
-
-@app.route("/todos", methods=["POST", "GET"])
-def todos():
-    title = request.form["title"]
-    title_error = ""
-
-    body = request.form["body"]
-    body_error = ""
-
-    owner = request.form['owner']
-    owner_error = ""
     
-    print("body requested")
+    if not session:
+        return redirect('login')
+    if request.method=="POST":
+        title = request.form["title"]
+        body = request.form["body"]
+        owner = session['username']
 
-    if title == "":
-        title_error = "Why don't you write something?"
-        return render_template("newpost.html", title=title, title_error = title_error)
-    if body == "":
-        body_error = "Why don't you write something?"
-        return render_template("newpost.html", body=body, body_error = body_error)
-    elif request.method == "POST":
+        if title == "":
+            title_error = "Why don't you write a title?"
+            return render_template("newpost.html", title=title, title_error = title_error)
+        if body == "":
+            body_error = "Why don't you write blog post?"
+            return render_template("newpost.html", body=body, body_error = body_error)
         blogpost = Blog(title, body, owner)
         db.session.add(blogpost)
- #       db.session.flush()
+        # db.session.flush()
         db.session.commit()
 
-    idnum = blogpost.id
-    return redirect('/blog')
-    #return redirect("/blog?id={0}".format(idnum))
+        idnum = blogpost.owner_id
+        return redirect("/blog?id={0}&username={1}".format(idnum, owner))
+    
+    return render_template('newpost.html')
+
+@app.route("/singleblog", methods=["POST", "GET"])
+def singleblog():
+    
+    idnum = request.args.get('id')
+    owner = request.args.get('user')
+    blog = Blog.query.filter_by(id=idnum).first()
+
+    return render_template ('singleblog.html', blog=blog)
+
+@app.route('/singleUser')
+def singleUser():
+    id = request.args.get('id')
+    users_blogs = Blog.query.filter_by(owner_id=id).all()
+    user = User.query.filter_by(id=id).first()
+    return render_template('singleUsers.html', users_blogs=users_blogs, user=user)
 
 
-if __name__=='__main__':
+if __name__ == "__main__":
     app.run()

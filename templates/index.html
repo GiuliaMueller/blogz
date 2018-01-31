@@ -2,4 +2,12 @@
 
 {% block content %}
 
+<h1>Authors</h1>
+<h3>Select an author to view his or her published blogs.</h3>
+
+
+        {% for user in users %}
+            <h2><a href='/singleUser?id={{user.id}}'>{{ user.username }}</a></h2>
+        {% endfor %}
+
 {% endblock %}

@@ -3,19 +3,23 @@
 {% block content %}
 
 <h1>Add a Blog Entry</h1>
-    <form action="/todos", method="post">
-        <label for="title">Title for your new blog:</label>
-            <input name="title" type = "text" class = "title" value={{title}}>
-                <span class="error">{{title_error}}</span>
-         <br>   <label for="body">Your new Blog:</label> <br><br>
-                <textarea name = "body" value= {{body}}></textarea>
-                <!-- <input name="body" type = "textarea" value={{body}}> -->
-        <span class="error">{{body_error}}</span>
+    <form method="post">
+            <label>Title for your new blog:<input name="title" type = "text" /></label>
+            <!-- <span class="error">{{title_error}}</span> -->
+        <br>
+        <br>   
+            <label for="body">Write your new Blog:</label> 
 
-<br><br><input type="submit" value ="Add Entry"/>
+        <br>
+        <br>
+            <textarea name = "body" /></textarea>
+                <!-- <input name="body" type = "textarea" value={{body}}> -->
+            <!-- <span class="error">{{body_error}}</span> -->
+
+        <br>
+        <br>
+            <input type="submit" value ="Add Entry"/>
 
     </form>
-    
-
 
 {% endblock %}
